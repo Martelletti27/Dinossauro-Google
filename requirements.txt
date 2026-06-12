@@ -1,0 +1,3 @@
+# Python 3.10+ — biblioteca padrão suficiente nesta etapa.
+# Descomente quando implementar o renderizador Pygame:
+# pygame>=2.5.0
