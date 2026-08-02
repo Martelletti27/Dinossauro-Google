@@ -28,10 +28,11 @@ alwaysApply: true
 
 ## Fluxo de trabalho (obrigatório)
 
-1. Propor **uma etapa pequena** por vez (o que fazer, em qual arquivo, ideia geral).
-2. Esperar o aluno **digitar e salvar**.
-3. **Conferir** o que ele escreveu (ler o arquivo) antes de avançar.
-4. Só então liberar a **próxima etapa**.
+1. Ao propor **cada novo passo**, começar com um **contexto breve** (2–4 frases): onde estamos no projeto, por que esta etapa existe e como se liga ao que já foi feito.
+2. Só então dizer **o que fazer** (arquivo, ideia, pseudocódigo).
+3. Esperar o aluno **digitar e salvar**.
+4. **Conferir** o que ele escreveu (ler o arquivo) antes de avançar.
+5. Só então liberar a **próxima etapa** (de novo com contexto breve).
 
 ## Entrega parcial ou incompleta
 

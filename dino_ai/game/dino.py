@@ -38,6 +38,9 @@ class Dino:
             self.y = CHAO
             if self.estado == PULANDO:
                 self.estado = EM_PE
-
+        if self.estado == EM_PE or self.estado == ABAIXADO:
+            self.fitness = self.fitness + 2
+        else:
+            self.fitness = self.fitness + 1
     def morrer(self):
         self.estado = MORTO
