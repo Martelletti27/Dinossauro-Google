@@ -75,11 +75,31 @@ Configuração atual em `dino_ai/treino.py`:
 | `GERACOES` | 20 |
 | `MAX_PASSOS` | 3000 |
 
-O mundo reposiciona o obstáculo quando ele sai pela esquerda (`x = 400` fixo), formando uma esteira de desafios.
+### Setup atual do cenário (importante para ler os números)
+
+Os experimentos abaixo usam um cenário **ainda bem simples**:
+
+- **Um único tipo de obstáculo** — o equivalente a um **cacto** no chão (mesma largura/altura; sem pássaros, sem grupos de cactos).
+- Esse obstáculo **reaparece** quando sai pela esquerda (esteira), mas sempre com **a mesma distância de respawn** (`x = 400` fixo).
+- O dino só usa de fato a saída de **pular** (abaixar/avião ainda não entram no jogo).
+- Fitness por frame (vivo): **+2** no chão (em pé/abaixado), **+1** pulando.
+
+Ou seja: os fitness altos mostram “sobreviveu muito tempo neste cacto em loop com espaçamento fixo”, **não** ainda domínio do jogo completo do Chrome.
+
+### Roteiro de experimentos (um de cada vez)
+
+Ordem pensada para medir impacto limpo:
+
+1. ~~População / gerações~~ (feito)
+2. ~~`MAX_PASSOS`~~ (feito)
+3. **Respawn com distância aleatória** (próximo) — evita decorar o timing de `x = 400`
+4. **Outros obstáculos** — alturas/larguras diferentes, pássaros, etc.
+5. Ações que faltam (abaixar, avião) e, depois, interface (Pygame)
 
 ### Experimentos e análise (hiperparâmetros)
 
-Mudanças feitas **uma de cada vez** para isolar o efeito.
+Mudanças feitas **uma de cada vez** para isolar o efeito.  
+Setup de cenário comum a estes testes: **1 cacto em loop**, respawn fixo, só pulo.
 
 #### 1) População e gerações (com `MAX_PASSOS = 500`)
 
@@ -88,7 +108,7 @@ Mudanças feitas **uma de cada vez** para isolar o efeito.
 | Pop 5 × 3 gerações | ~174 |
 | Pop 30 × 20 gerações | ~698 (já na geração 0; estável depois) |
 
-**Leitura:** mais candidatos ajudam a achar um DNA que passa vários obstáculos. Depois disso o elite se mantém e as mutações raramente o superam.
+**Leitura:** mais candidatos ajudam a achar um DNA que passa vários “ciclos” do mesmo cacto. Depois disso o elite se mantém e as mutações raramente o superam.
 
 #### 2) Limite de passos do episódio (pop 30 × 20 gerações)
 
@@ -100,12 +120,10 @@ Mudanças feitas **uma de cada vez** para isolar o efeito.
 
 **Leitura:**
 
-- Subir `MAX_PASSOS` **aumenta** o fitness na mesma proporção aproximada: o bom DNA **enche o cronômetro** (sobrevive até o fim do episódio).
+- Subir `MAX_PASSOS` **aumenta** o fitness na mesma proporção aproximada: o bom DNA **enche o cronômetro** (sobrevive até o fim do episódio neste cenário de 1 cacto).
 - O valor fica abaixo do teto teórico porque há frames de pulo (fitness +1 em vez de +2).
 - O genético encontra esse patamar cedo (muitas vezes na geração 0–2) e estabiliza.
-- Continuar só aumentando `MAX_PASSOS` alonga a mesma prova; para aprender se a política generaliza, o próximo passo é variar o cenário (ex.: distância aleatória no respawn).
-
-Fitness por frame (vivo): **+2** no chão (em pé/abaixado), **+1** pulando.
+- Continuar só aumentando `MAX_PASSOS` alonga a mesma prova; o próximo experimento útil é **respawn aleatório**, depois **outros tipos de obstáculo**.
 
 ## Progresso do port Python
 
