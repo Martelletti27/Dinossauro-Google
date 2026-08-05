@@ -21,6 +21,9 @@ class Mundo:
     def passo(self):
         self.obstaculo.mover(self.velocidade)
 
+        if self.obstaculo.x + self.obstaculo.largura < 0:
+            self.obstaculo.x = 400
+        
         self.dino.atualizar()
 
         self.sensores = ler_sensores(self.dino, self.obstaculo, self.velocidade)
@@ -36,4 +39,3 @@ class Mundo:
         if colisao(self.dino, self.obstaculo) == True:
             self.dino.morrer()
 
- 
