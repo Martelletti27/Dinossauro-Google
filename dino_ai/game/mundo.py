@@ -1,4 +1,4 @@
-from dino_ai.game.dino import Dino
+from dino_ai.game.dino import Dino, CHAO
 from dino_ai.game.obstaculo import Obstaculo
 from dino_ai.game.colisao import colisao
 from dino_ai.game.sensores import ler_sensores
@@ -24,7 +24,19 @@ class Mundo:
 
         if self.obstaculo.x + self.obstaculo.largura < 0:
             self.obstaculo.x = random.randint(350,550)
+
+            aleatorio = random.randint(0,1)
+            if aleatorio == 1:
+                self.obstaculo.largura = 20
+                self.obstaculo.altura = 40
+                self.obstaculo.y = CHAO
+            else:
+                self.obstaculo.largura = 30
+                self.obstaculo.altura = 70
+                self.obstaculo.y = CHAO
         
+            self.obstaculo.tipo = aleatorio
+
         self.dino.atualizar()
 
         self.sensores = ler_sensores(self.dino, self.obstaculo, self.velocidade)

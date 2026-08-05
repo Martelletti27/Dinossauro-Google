@@ -83,21 +83,23 @@ Configuração atual em `dino_ai/treino.py`:
 
 O simulador ainda é **bem simples** frente ao jogo completo do Chrome:
 
-- **Um único tipo de obstáculo** — o equivalente a um **cacto** no chão (mesma largura/altura; sem pássaros, sem grupos de cactos).
-- O cacto **reaparece** quando sai pela esquerda (esteira).
-- **Agora** a distância de respawn é **aleatória** (`x` entre 350 e 550). Os experimentos 1 e 2 abaixo foram feitos antes, com respawn **fixo** em 400.
+- Obstáculos só no **chão** (sem pássaros ainda).
+- No respawn, sorteia **dois tamanhos de cacto**: 20×40 ou 30×70, com `x` entre 350 e 550.
 - O dino só usa de fato a saída de **pular** (abaixar/avião ainda não entram no jogo).
 - Fitness por frame (vivo): **+2** no chão (em pé/abaixado), **+1** pulando.
 
-Fitness alto = “sobreviveu muito tempo neste cacto em loop”, **não** domínio do jogo completo.
+Os experimentos 1–3 usavam **um único tamanho** de cacto; o experimento 4 introduziu o segundo tamanho.
+
+Fitness alto = “sobreviveu muito tempo neste loop de cactos”, **não** domínio do jogo completo.
 
 ### Roteiro de experimentos (um de cada vez)
 
 1. ~~População / gerações~~ (feito)
 2. ~~`MAX_PASSOS`~~ (feito)
 3. ~~Respawn com distância aleatória~~ (feito)
-4. **Outros obstáculos** (próximo) — alturas/larguras diferentes, pássaros, etc.
-5. Ações que faltam (abaixar, avião) e, depois, interface (Pygame)
+4. ~~Dois tamanhos de cacto no chão~~ (feito)
+5. **Pássaro / obstáculos no ar** (próximo) — aí abaixar passa a importar
+6. Mais variedade + ações (avião) e, depois, interface (Pygame)
 
 ### Experimentos e análise (hiperparâmetros)
 
@@ -146,7 +148,24 @@ Setup: **1 cacto**, pop 30 × 20 gerações, `MAX_PASSOS = 3000`, só pulo.
 - A rede **não quebrou** com espaçamento variável: ainda encontra DNAs que sobrevivem o episódio inteiro.
 - Fitness pode ficar **acima** de 3900 porque gaps maiores (até 550) dão mais tempo no chão (+2) e menos pressão de pulo.
 - Há **mais variação** entre indivíduos (menos “todo mundo 3900”) e um pouco mais de evolução geracional.
-- Continua sendo só **1 tipo de cacto**; o próximo experimento útil é **outros obstáculos** (tamanho/altura/pássaros).
+- Continua sendo só **1 tipo de cacto**; o próximo passo foi variar o **tamanho** (experimento 4).
+
+#### 4) Dois tamanhos de cacto no chão
+
+Setup: pop 30 × 20 gerações, `MAX_PASSOS = 3000`, respawn `x` 350–550, só pulo.  
+Única mudança: no respawn, sorteia cacto **baixo** (20×40) ou **alto** (30×70).
+
+| Cenário | Melhor ger. 0 | Pico | Final (ger. 19) |
+|---------|---------------|------|-----------------|
+| 1 tamanho + x aleatório | ~4155 | ~4300 | ~4177 |
+| 2 tamanhos + x aleatório | ~4100 | **~4276** | ~4192 |
+
+**Leitura:**
+
+- A rede **ainda** encontra DNAs que enchem o episódio (~4200); o segundo tamanho não derrubou o treino.
+- Impacto no platô dos campeões foi **leve** (faixa parecida com o experimento 3).
+- Aparecem mais fitness intermediários na população (falha no cacto alto ou no timing) — cenário um pouco mais exigente sem mudar o teto dos melhores.
+- Próximo salto de dificuldade útil: **pássaro** (Y no ar), onde abaixar passa a importar.
 
 ## Progresso do port Python
 
@@ -156,7 +175,8 @@ Setup: **1 cacto**, pop 30 × 20 gerações, `MAX_PASSOS = 3000`, só pulo.
 - [x] Sensores + decisão da rede no mundo
 - [x] Algoritmo genético + loop de treino
 - [x] Respawn com distância aleatória
-- [ ] Outros tipos de obstáculo / cenários mais ricos
+- [x] Dois tamanhos de cacto no chão
+- [ ] Pássaro / obstáculos no ar + abaixar
 - [ ] Interface gráfica (Pygame)
 
 ## Créditos
