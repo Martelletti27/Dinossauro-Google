@@ -7,7 +7,7 @@ from dino_ai.genetico import proxima_geracao
 
 
 TAMANHO_POP = 30
-MAX_PASSOS = 500
+MAX_PASSOS = 3000
 GERACOES = 20    
 populacao = []
 
