@@ -2,7 +2,7 @@
 
 Fork e reimplementação em **Python** do projeto [Dinossauro-Google](https://github.com/JVictorDias/Dinossauro-Google) de [Victor Dias](https://github.com/JVictorDias), onde redes neurais evoluem para aprender a jogar o jogo do dinossauro do Chrome.
 
-![Preview](original/preview.gif)
+Preview
 
 ## Sobre o projeto
 
@@ -10,11 +10,13 @@ Várias redes neurais competem em paralelo. As que sobrevivem mais tempo passam 
 
 ### Rede neural (MLP)
 
-| Camada | Tamanho | Função |
-|--------|---------|--------|
-| Entrada | 6 sensores + 1 bias | distância, largura, Y e altura do obstáculo, velocidade, altura do dino |
-| Oculta | 6 neurônios + 1 bias | processamento intermediário |
-| Saída | 3 neurônios | pular, abaixar, avião |
+
+| Camada  | Tamanho              | Função                                                                  |
+| ------- | -------------------- | ----------------------------------------------------------------------- |
+| Entrada | 6 sensores + 1 bias  | distância, largura, Y e altura do obstáculo, velocidade, altura do dino |
+| Oculta  | 6 neurônios + 1 bias | processamento intermediário                                             |
+| Saída   | 3 neurônios          | pular, abaixar, avião                                                   |
+
 
 - Ativação: **ReLU**
 - DNA: **70 pesos** por indivíduo
@@ -69,48 +71,52 @@ python -m dino_ai.treino
 
 Configuração atual em `dino_ai/treino.py`:
 
-| Parâmetro | Valor |
-|-----------|-------|
-| `TAMANHO_POP` | 30 |
-| `GERACOES` | 20 |
-| `MAX_PASSOS` | 3000 |
+
+| Parâmetro     | Valor |
+| ------------- | ----- |
+| `TAMANHO_POP` | 30    |
+| `GERACOES`    | 20    |
+| `MAX_PASSOS`  | 3000  |
+
 
 ### Setup atual do cenário (importante para ler os números)
 
-Os experimentos abaixo usam um cenário **ainda bem simples**:
+O simulador ainda é **bem simples** frente ao jogo completo do Chrome:
 
 - **Um único tipo de obstáculo** — o equivalente a um **cacto** no chão (mesma largura/altura; sem pássaros, sem grupos de cactos).
-- Esse obstáculo **reaparece** quando sai pela esquerda (esteira), mas sempre com **a mesma distância de respawn** (`x = 400` fixo).
+- O cacto **reaparece** quando sai pela esquerda (esteira).
+- **Agora** a distância de respawn é **aleatória** (`x` entre 350 e 550). Os experimentos 1 e 2 abaixo foram feitos antes, com respawn **fixo** em 400.
 - O dino só usa de fato a saída de **pular** (abaixar/avião ainda não entram no jogo).
 - Fitness por frame (vivo): **+2** no chão (em pé/abaixado), **+1** pulando.
 
-Ou seja: os fitness altos mostram “sobreviveu muito tempo neste cacto em loop com espaçamento fixo”, **não** ainda domínio do jogo completo do Chrome.
+Fitness alto = “sobreviveu muito tempo neste cacto em loop”, **não** domínio do jogo completo.
 
 ### Roteiro de experimentos (um de cada vez)
 
-Ordem pensada para medir impacto limpo:
-
 1. ~~População / gerações~~ (feito)
 2. ~~`MAX_PASSOS`~~ (feito)
-3. **Respawn com distância aleatória** (próximo) — evita decorar o timing de `x = 400`
-4. **Outros obstáculos** — alturas/larguras diferentes, pássaros, etc.
+3. ~~Respawn com distância aleatória~~ (feito)
+4. **Outros obstáculos** (próximo) — alturas/larguras diferentes, pássaros, etc.
 5. Ações que faltam (abaixar, avião) e, depois, interface (Pygame)
 
 ### Experimentos e análise (hiperparâmetros)
 
-Mudanças feitas **uma de cada vez** para isolar o efeito.  
-Setup de cenário comum a estes testes: **1 cacto em loop**, respawn fixo, só pulo.
+Mudanças feitas **uma de cada vez** para isolar o efeito.
 
-#### 1) População e gerações (com `MAX_PASSOS = 500`)
+#### 1) População e gerações
+
+Setup: **1 cacto**, respawn fixo `x = 400`, `MAX_PASSOS = 500`, só pulo.
 
 | Setup | Melhor fitness típico |
 |-------|------------------------|
 | Pop 5 × 3 gerações | ~174 |
 | Pop 30 × 20 gerações | ~698 (já na geração 0; estável depois) |
 
-**Leitura:** mais candidatos ajudam a achar um DNA que passa vários “ciclos” do mesmo cacto. Depois disso o elite se mantém e as mutações raramente o superam.
+**Leitura:** mais candidatos ajudam a achar um DNA que passa vários ciclos do mesmo cacto. Depois o elite se mantém e as mutações raramente o superam.
 
-#### 2) Limite de passos do episódio (pop 30 × 20 gerações)
+#### 2) Limite de passos do episódio
+
+Setup: **1 cacto**, respawn fixo `x = 400`, pop 30 × 20 gerações, só pulo.
 
 | `MAX_PASSOS` | Melhor estável | Teto teórico (sempre no chão, +2/frame) | Melhor ÷ passos |
 |--------------|----------------|----------------------------------------|-----------------|
@@ -120,10 +126,27 @@ Setup de cenário comum a estes testes: **1 cacto em loop**, respawn fixo, só p
 
 **Leitura:**
 
-- Subir `MAX_PASSOS` **aumenta** o fitness na mesma proporção aproximada: o bom DNA **enche o cronômetro** (sobrevive até o fim do episódio neste cenário de 1 cacto).
-- O valor fica abaixo do teto teórico porque há frames de pulo (fitness +1 em vez de +2).
-- O genético encontra esse patamar cedo (muitas vezes na geração 0–2) e estabiliza.
-- Continuar só aumentando `MAX_PASSOS` alonga a mesma prova; o próximo experimento útil é **respawn aleatório**, depois **outros tipos de obstáculo**.
+- Subir `MAX_PASSOS` aumenta o fitness na mesma proporção aproximada: o bom DNA **enche o cronômetro**.
+- Fica abaixo do teto teórico por causa dos frames de pulo (+1).
+- O genético acha o patamar cedo (geração 0–2) e estabiliza.
+- Só alongar o episódio traz pouca informação nova sobre generalização.
+
+#### 3) Respawn com distância aleatória
+
+Setup: **1 cacto**, pop 30 × 20 gerações, `MAX_PASSOS = 3000`, só pulo.  
+Única mudança: ao sair da tela, `x = random(350..550)` em vez de `400` fixo.
+
+| Respawn | Melhor ger. 0 | Pico no treino | Comportamento |
+|---------|---------------|----------------|---------------|
+| Fixo `x = 400` | ~3900 | ~3900 | Platô duro; muitos indivíduos iguais |
+| Aleatório 350–550 | ~4155 | **~4300** (ger. 18) | Oscila ~4100–4300; sobe um pouco ao longo das gerações |
+
+**Leitura:**
+
+- A rede **não quebrou** com espaçamento variável: ainda encontra DNAs que sobrevivem o episódio inteiro.
+- Fitness pode ficar **acima** de 3900 porque gaps maiores (até 550) dão mais tempo no chão (+2) e menos pressão de pulo.
+- Há **mais variação** entre indivíduos (menos “todo mundo 3900”) e um pouco mais de evolução geracional.
+- Continua sendo só **1 tipo de cacto**; o próximo experimento útil é **outros obstáculos** (tamanho/altura/pássaros).
 
 ## Progresso do port Python
 
@@ -132,7 +155,8 @@ Setup de cenário comum a estes testes: **1 cacto em loop**, respawn fixo, só p
 - [x] Simulador headless (física, colisão, obstáculo em loop)
 - [x] Sensores + decisão da rede no mundo
 - [x] Algoritmo genético + loop de treino
-- [ ] Distância de respawn aleatória / cenários mais ricos
+- [x] Respawn com distância aleatória
+- [ ] Outros tipos de obstáculo / cenários mais ricos
 - [ ] Interface gráfica (Pygame)
 
 ## Créditos

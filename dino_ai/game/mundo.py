@@ -3,6 +3,7 @@ from dino_ai.game.obstaculo import Obstaculo
 from dino_ai.game.colisao import colisao
 from dino_ai.game.sensores import ler_sensores
 from dino_ai.neural_network import criar_rede, copiar_para_entrada, calcular_saida, copiar_da_saida, copiar_vetor_para_camadas
+import random
 
 class Mundo:
     def __init__(self, dna=None):
@@ -22,7 +23,7 @@ class Mundo:
         self.obstaculo.mover(self.velocidade)
 
         if self.obstaculo.x + self.obstaculo.largura < 0:
-            self.obstaculo.x = 400
+            self.obstaculo.x = random.randint(350,550)
         
         self.dino.atualizar()
 
