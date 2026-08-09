@@ -30,8 +30,9 @@ dino_ai/
   treino.py           Loop de evolução
   game/               Simulador headless (dino, obstáculo, colisão, mundo, sensores)
   tests/              Testes da rede, mundo e genético
-original/             Código C/C++ original (referência)
+original/             Código C/C++ original (gabarito do port)
 assets/               Sprites, redes treinadas do original, material de estudo
+.cursor/              Regras e subagentes do modo ensino e da auditoria contra o C
 ```
 
 ## Requisitos
@@ -81,16 +82,16 @@ Configuração atual em `dino_ai/treino.py`:
 
 ### Setup atual do cenário (importante para ler os números)
 
-O simulador ainda é **bem simples** frente ao jogo completo do Chrome:
+O simulador ainda é **mais simples** que o jogo completo do Chrome:
 
-- Obstáculos só no **chão** (sem pássaros ainda).
-- No respawn, sorteia **dois tamanhos de cacto**: 20×40 ou 30×70, com `x` entre 350 e 550.
-- O dino só usa de fato a saída de **pular** (abaixar/avião ainda não entram no jogo).
+- No respawn, sorteia **três obstáculos**: cacto baixo (20×40), cacto alto (30×70) ou **pássaro** (30×25, a 30 acima do chão), com `x` entre 350 e 550.
+- O dino usa **pular** e **abaixar**; a terceira saída (avião) existe no DNA mas ainda não é lida.
 - Fitness por frame (vivo): **+2** no chão (em pé/abaixado), **+1** pulando.
+- Velocidade do mundo começa em **-3** e acelera **0,0005 por frame** até o teto de **8** (igual ao original).
 
-Os experimentos 1–3 usavam **um único tamanho** de cacto; o experimento 4 introduziu o segundo tamanho.
+Os experimentos 1–3 usavam **um único tamanho** de cacto; o 4 introduziu o segundo tamanho; o 5 introduziu o pássaro e o abaixar; o 6 aplicou quatro ajustes no simulador após o colapso do 174.
 
-Fitness alto = “sobreviveu muito tempo neste loop de cactos”, **não** domínio do jogo completo.
+Fitness alto = “sobreviveu muito tempo neste loop de obstáculos”, **não** domínio do jogo completo.
 
 ### Roteiro de experimentos (um de cada vez)
 
@@ -98,8 +99,9 @@ Fitness alto = “sobreviveu muito tempo neste loop de cactos”, **não** domí
 2. ~~`MAX_PASSOS`~~ (feito)
 3. ~~Respawn com distância aleatória~~ (feito)
 4. ~~Dois tamanhos de cacto no chão~~ (feito)
-5. **Pássaro / obstáculos no ar** (próximo) — aí abaixar passa a importar
-6. Mais variedade + ações (avião) e, depois, interface (Pygame)
+5. ~~Pássaro / obstáculos no ar + abaixar~~ (feito — colapso em 174; causa era divergência do C)
+6. ~~Ajustes pós-174 (ordem, queda, colisão, aceleração, mutação variável + decaimento)~~ (feito)
+7. Terceira saída (avião) e, depois, interface (Pygame)
 
 ### Experimentos e análise (hiperparâmetros)
 
@@ -167,6 +169,47 @@ Setup: pop 30 × 20 gerações, `MAX_PASSOS = 3000`, respawn `x` 350–550, só 
 - Aparecem mais fitness intermediários na população (falha no cacto alto ou no timing) — cenário um pouco mais exigente sem mudar o teto dos melhores.
 - Próximo salto de dificuldade útil: **pássaro** (Y no ar), onde abaixar passa a importar.
 
+#### 5) Pássaro no ar + ação de abaixar
+
+Setup: pop 30 × 20 gerações, `MAX_PASSOS = 3000`, respawn `x` 350–550.  
+Mudança: no respawn entra um terceiro sorteio, o **pássaro** (30×25 a `CHAO + 30`), a saída 2 da rede passa a acionar `abaixar`, e a caixa de colisão do dino encolhe de 40 para 20 de altura quando ele está abaixado.
+
+| Cenário | Melhor ger. 0 | Final (ger. 19) |
+|---------|---------------|-----------------|
+| 2 cactos, só pulo | ~4100 | ~4192 |
+| + pássaro e abaixar | **174** | **174** |
+
+**Leitura:** colapso total, e o valor `174` denunciou a causa. Ele não é aleatório: o dino nasce em `x = 100` com 40 de largura, o obstáculo começa em `x = 400` e anda 3 por frame, então o encontro acontece em `(400 - 140) / 3 ≈ 87` frames; parado no chão são `87 × 2 = 174` pontos. Ou seja, **a população inteira estava morrendo no primeiro cacto sem sair do chão**. Medindo a frequência das saídas, o abaixar ficava ativo em ~62% dos frames — e isso, somado à ordem errada das ações, anulava todo pulo. O próximo passo não foi mexer em hiperparâmetro: foram ajustes no simulador e no genético.
+
+#### 6) Ajustes após o colapso do 174
+
+Ajustes feitos **um de cada vez**. Medição: 8 treinos com sementes fixas (0 a 7), pop 30 × 20 gerações, `MAX_PASSOS = 3000`.
+
+| # | Ajuste | Melhor fitness | Sementes que completam o episódio | Presos em 174 |
+|---|--------|----------------|-----------------------------------|---------------|
+| — | (antes dos ajustes; estado do exp. 5) | 174 | 0 de 8 | 8 de 8 |
+| 1 | Ordem das ações no frame: `abaixar` antes de `pular` | 5135 | 6 de 8 | ~2 de 8 |
+| 2 | Abaixar no ar também empurra o dino 2 para baixo | 5283 | 7 de 8 | ~1 de 8 |
+| 3 | Colisão avaliada **antes** da decisão da rede | 4782 | 6 de 8 | ~2 de 8 |
+| 4 | Velocidade do mundo acelera 0,0005/frame até 8 | 4622 | 4 de 8 | ~3 de 8 |
+| 5 | Mutação com quantidade variável (1 até tamanho do DNA) | 4402 | 4 de 8 | 0 de 8 |
+| 6 | Teto de mutação decai ×0,99 por geração (piso 20) | **4992** | **6 de 8** | **0 de 8** |
+
+**Leitura:**
+
+1. **Ordem das ações** — bug fatal. Com `pular` antes de `abaixar`, o impulso era criado e apagado no mesmo frame. Invertendo a ordem, o pulo volta a funcionar. Fitness saltou de 174 para a casa dos 4000–5000.
+2. **Queda rápida** — além de frear a subida, abaixar no ar agora também empurra o dino 2 para baixo. Permite abortar um pulo mal calculado. Ganho pequeno e consistente.
+3. **Momento da colisão** — a colisão passa a ser checada antes da decisão da rede, então a agachada só vale a partir do frame seguinte. **O fitness caiu de propósito** (5283 → 4782): o jogo ficou mais exigente, não pior.
+4. **Aceleração do mundo** — a velocidade deixa de ser fixa em -3: aos 3000 passos chega a **-4,5** (ainda longe do teto 8). O quinto sensor passa a variar. Melhor fitness 4782 → 4622, sementes que completam 6/8 → 4/8. Queda esperada — o cenário aperta com o tempo.
+5. **Mutação variável** — em vez de trocar sempre 5 pesos, cada filho muda um número sorteado entre 1 e o tamanho do DNA (~70). Isso ataca a armadilha do 174: mesmo quando a geração 0 só tem dino parado, as mutações maiores conseguem achar um pulador. **Presos em 174: 3/8 → 0/8.**
+6. **Decaimento do teto** — o máximo de mutações começa em 70 e cai 1% por geração (piso 20). Em 20 gerações o teto vai a ~57: ainda alto, mas a tendência é explorar mais no começo e afinar depois. Completam o episódio 4/8 → **6/8**; melhor fitness **4992**; presos em 174 continuam **0/8**.
+
+**Pendências que sobraram depois deste passo:**
+
+- **Terceira saída sem uso.** `QTD_OUTPUT = 3`, mas o mundo só lê pular e abaixar. São genes que não afetam nada e diluem a mutação. Ou implementar o avião, ou reduzir para 2 saídas.
+- **Divergências ainda abertas no genético (opcional):** população do original é 2000 (aqui 30); o C tem 3 tipos de operador de mutação (substituir / multiplicar / somar). Aqui só substituímos.
+- **Divergências aceitas de propósito:** um único obstáculo reciclado; dino em `x` fixo (100); caixa de colisão com medidas fixas.
+
 ## Progresso do port Python
 
 - [x] Rede neural (`neural_network.py`) — forward pass completo
@@ -176,7 +219,11 @@ Setup: pop 30 × 20 gerações, `MAX_PASSOS = 3000`, respawn `x` 350–550, só 
 - [x] Algoritmo genético + loop de treino
 - [x] Respawn com distância aleatória
 - [x] Dois tamanhos de cacto no chão
-- [ ] Pássaro / obstáculos no ar + abaixar
+- [x] Pássaro / obstáculos no ar + abaixar
+- [x] Ordem das ações, queda rápida, momento da colisão e aceleração do mundo
+- [x] Mutação com quantidade variável + decaimento do teto (armadilha do 174)
+- [ ] Terceira saída da rede (avião) ou redução para 2 saídas
+- [ ] Salvar/carregar o melhor DNA em arquivo
 - [ ] Interface gráfica (Pygame)
 
 ## Créditos

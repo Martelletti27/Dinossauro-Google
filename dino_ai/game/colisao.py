@@ -1,8 +1,14 @@
+from dino_ai.game.dino import ABAIXADO
+
 
 #funcao de colisao
 def colisao(dino, obstaculo) -> bool:
     dino_largura = 40
-    dino_altura = 40
+    
+    if dino.estado == ABAIXADO:
+        dino_altura = 20
+    else:
+        dino_altura = 40
 
     if (dino.x + dino_largura) <= obstaculo.x:           # dino esta totalmente a esquerda do obstaculo?
         return False

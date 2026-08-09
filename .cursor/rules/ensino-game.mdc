@@ -26,13 +26,21 @@ alwaysApply: true
 - Pseudocódigo não deve parecer Python copiável (evitar `def`, `class`, `self.`, `return`, etc. estilo código real).
 - Ao revisar, apontar o que está certo/errado em palavras; não reescrever a solução em código.
 
+## Pseudocódigo é obrigatório
+
+- Em **todo** passo de implementação e em **toda** correção pedida ao aluno, incluir um bloco de **pseudocódigo** claro.
+- O pseudocódigo deve ser concreto o bastante para o aluno digitar sozinho: nomes das variáveis/funções envolvidas, ordem das operações, valores numéricos, e onde no arquivo mexer.
+- Formato preferido: lista numerada ou bloco indentado em linguagem natural (ex.: "sortear quantidade entre 1 e a parte inteira do teto").
+- Sem pseudocódigo, o passo está incompleto — não basta só descrever em prosa.
+- Continua proibido parecer código Python copiável.
+
 ## Fluxo de trabalho (obrigatório)
 
 1. Ao propor **cada novo passo**, começar com um **contexto breve** (2–4 frases): onde estamos no projeto, por que esta etapa existe e como se liga ao que já foi feito.
-2. Só então dizer **o que fazer** (arquivo, ideia, pseudocódigo).
+2. Só então dizer **o que fazer** (arquivo, ideia) e em seguida o **pseudocódigo obrigatório**.
 3. Esperar o aluno **digitar e salvar**.
 4. **Conferir** o que ele escreveu (ler o arquivo) antes de avançar.
-5. Só então liberar a **próxima etapa** (de novo com contexto breve).
+5. Só então liberar a **próxima etapa** (de novo com contexto breve + pseudocódigo).
 
 ## Entrega parcial ou incompleta
 

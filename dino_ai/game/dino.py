@@ -42,5 +42,20 @@ class Dino:
             self.fitness = self.fitness + 2
         else:
             self.fitness = self.fitness + 1
+
     def morrer(self):
         self.estado = MORTO
+
+    def abaixar(self, ativo:bool):
+        if self.estado == MORTO:
+            return
+        if ativo:
+            if self.estado == PULANDO:
+                if self.velocidade_y > 0:
+                    self.velocidade_y = 0
+                self.y = self.y - 2
+            else:
+                self.estado = ABAIXADO
+        else:
+            if self.estado == ABAIXADO:
+                self.estado = EM_PE

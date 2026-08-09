@@ -1,0 +1,20 @@
+---
+description: Ao fechar um bloco de trabalho, sugerir e preferir commit + push via agente commit-push
+alwaysApply: true
+---
+
+# Commit + push ao fechar bloco
+
+Sempre que um **bloco** for concluído e validado (experimento medido, ajuste do
+simulador/genético ok, etapa do roteiro fechada, regras/agentes novos), o agente
+principal deve:
+
+1. **Sugerir** commit + push em uma frase objetiva.
+2. Preferir delegar ao subagente `commit-push` (ou seguir o protocolo dele).
+3. **Sempre** commit **e** push juntos — não deixar só local.
+
+Não precisa esperar o aluno lembrar: ao fechar o bloco, ofereça. Se o aluno já
+pediu o fluxo automático nesta conversa, execute sem perguntar de novo.
+
+Mensagens de commit no padrão do `git log` do repo (frase em português, verbo
+tipo Adiciona/Documenta/Corrige, sem `feat:` nem emoji).

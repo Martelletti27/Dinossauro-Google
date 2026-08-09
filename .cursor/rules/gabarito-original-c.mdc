@@ -1,0 +1,84 @@
+---
+description: O C em original/ é referência de comportamento — consultar antes de planejar; o port Python não é um clone linha a linha
+alwaysApply: true
+---
+
+# Referência: o projeto original em C
+
+Este repositório é um **port em Python** do jogo em C que está em `original/`. Esse
+código já funciona e já foi treinado. Ele é a **referência de comportamento** (o que o
+jogo e a IA devem fazer), não um molde para clonar sintaxe C em Python.
+
+## O que queremos no fim
+
+O **mesmo projeto** em Python: mesma ideia de jogo, mesma rede, mesmo genético, mesmo
+tipo de aprendizado. Não precisamos de um clone estrutural do C (mesmos nomes, mesmos
+arquivos, mesmas gambiarras de linguagem). Onde o C ensina a regra do jogo, seguimos;
+onde o Python tem forma mais clara ou idiomática, preferimos a forma Python — desde que
+o **comportamento** continue equivalente.
+
+## Regra central
+
+Antes de propor **qualquer** próximo passo, mudança de valor, nova mecânica ou
+diagnóstico de bug, o agente **deve** ler o trecho equivalente em `original/` e citar
+`arquivo:linha`. Sem essa consulta, o passo não é proposto.
+
+Ordem de decisão, sempre nesta sequência:
+
+1. **Existe no original?** Entender a intenção e o comportamento; reproduzir isso no
+   Python com a forma mais clara para Python (funções, classes, nomes, organização).
+2. **Existe, mas depende de gráfico/janela ou de detalhe só do C?** Adaptar mantendo o
+   comportamento (o port é headless), e dizer explicitamente o que foi adaptado.
+3. **Constante de física / regra de jogo?** Preferir o valor do original até prova em
+   contrário — números como gravidade e impulso não se “melhoram” no chute.
+4. **Não existe no original, ou é só estilo de código?** Decisão de projeto Python —
+   anunciar, justificar, e (se for divergência de comportamento) registrar no README.
+
+## O que NÃO é obrigatório clonar
+
+- Organização de arquivos, macros, ponteiros, `static` globais, estilo C.
+- População 2000, detalhes de UI, sprites, se o Python ainda está em etapa mais simples.
+- Três operadores de mutação, avião, etc., **no mesmo instante** — podem entrar por
+  etapas, desde que a intenção do original seja conhecida e o atraso seja consciente.
+
+## Onde procurar cada assunto
+
+| Assunto | Arquivo do original |
+|---|---|
+| Decisão da rede virar ação (pular/abaixar/avião) e **ordem** de aplicação | `main.cpp` → `ControlarEstadoDinossauros()` |
+| Gravidade, velocidade Y, pouso, estados | `main.cpp` → `AplicarGravidade()` |
+| Mutação, elite, nova geração | `main.cpp` → `RandomMutations()`, `DNAs.h` |
+| Fim de partida / morte / fitness | `main.cpp` → `VerificarFimDePartida()`, `Colisao.h` → `AplicarColisao()` |
+| Os 6 sensores de entrada | `InputsRedeNeural.h` |
+| Tipos, tamanhos e espaçamento de obstáculos | `GeradorObstaculos.h`, `FuncoesAuxiliares.h` → `getNextObstaculo()` |
+| Movimento do mundo e velocidade do jogo | `Movimentar.h`, `Variaveis.h` |
+| Valores iniciais do dino e do mundo | `Inicializar.h`, `Variaveis.h` |
+| Rede neural (relu, camadas, DNA) | `redeNeural.c` |
+| Constantes globais e limites | `Variaveis.h`, `Tipos.h` |
+
+## Antes de culpar o aprendizado
+
+Quando o treino estagnar ou o fitness colapsar, a **primeira** hipótese é divergência de
+**comportamento** em relação à referência — não hiperparâmetro ruim. Conferir nesta
+ordem: ordem das ações no frame, constantes de física, regra de colisão, regra de
+fitness, mutação. Só depois mexer em população/gerações/passos.
+
+Exemplo real deste projeto: o treino travou em 174 de fitness por 20 gerações. A causa
+não era a mutação — era a ordem das chamadas no frame, invertida em relação ao
+`ControlarEstadoDinossauros()`, que zerava o impulso do pulo no mesmo frame em que ele
+era criado.
+
+## Divergências deliberadas
+
+Toda divergência **de comportamento** intencional precisa ser: anunciada ao aluno no
+momento em que acontece, justificada em uma frase, e registrada no `README.md` na seção
+de experimentos. Divergência de comportamento não registrada é bug. Diferença só de
+estilo Python não precisa ir para o README.
+
+## Como isso convive com o modo ensino
+
+A regra `ensino-game.mdc` continua valendo: o agente **lê** o original e **explica em
+palavras** o que ele faz, mas **nunca cola código** (nem C, nem Python) no chat, e
+**nunca edita** os arquivos do jogo. Citar `arquivo:linha` e descrever a lógica é
+obrigatório; transcrever o trecho é proibido. Orientar com **pseudocódigo** idiomático
+de Python em linguagem natural.
