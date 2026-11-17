@@ -57,8 +57,13 @@ class Mundo:
         if saidas[0] != 0:
             self.dino.pular()
 
+        if saidas[2] != 0:
+            self.dino.usar_aviao()
+
         if abs(self.velocidade) < 8:
             self.velocidade = self.velocidade - 0.0005
+        
+        self.dino.atualizar_aviao(self.velocidade)
 
 
 
