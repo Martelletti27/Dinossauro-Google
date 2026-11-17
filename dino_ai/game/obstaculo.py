@@ -1,4 +1,8 @@
 from dino_ai.game.dino import CHAO
+TIPO_ESPINHO = 6
+LARGURA_ESPINHO = 810
+ALTURA_ESPINHO = 31
+Y_ESPINHO = 10
 
 # Classe Obstaculo
 class Obstaculo:
@@ -7,7 +11,7 @@ class Obstaculo:
         self.y = CHAO
         self.largura = largura
         self.altura = altura
-        self.tipo= tipo
+        self.tipo = tipo
     
     def mover(self, velocidade:int):
         self.x = self.x + velocidade

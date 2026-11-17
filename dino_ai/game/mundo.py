@@ -1,5 +1,5 @@
 from dino_ai.game.dino import Dino, CHAO
-from dino_ai.game.obstaculo import Obstaculo
+from dino_ai.game.obstaculo import ALTURA_ESPINHO, LARGURA_ESPINHO, TIPO_ESPINHO, Y_ESPINHO, Obstaculo
 from dino_ai.game.colisao import colisao
 from dino_ai.game.sensores import ler_sensores
 from dino_ai.neural_network import criar_rede, copiar_para_entrada, calcular_saida, copiar_da_saida, copiar_vetor_para_camadas
@@ -16,6 +16,7 @@ class Mundo:
             tipo = 0
         )
         self.velocidade = -3
+        self.contador_espinhos = 0
         self.rede = criar_rede(QTD_CAMADAS_ESCONDIDAS,QTD_INPUT,QTD_HIDE,QTD_OUTPUT)
         if dna is not None:
             copiar_vetor_para_camadas(self.rede, dna)
@@ -26,21 +27,30 @@ class Mundo:
         if self.obstaculo.x + self.obstaculo.largura < 0:
             self.obstaculo.x = random.randint(350,550)
 
-            aleatorio = random.randint(0,2)
-            if aleatorio == 1:
-                self.obstaculo.largura = 20
-                self.obstaculo.altura = 40
-                self.obstaculo.y = CHAO
-            elif aleatorio == 2:
-                self.obstaculo.largura = 30
-                self.obstaculo.altura = 25
-                self.obstaculo.y = CHAO + 30
+            if self.contador_espinhos >= 10:
+                self.obstaculo.tipo = TIPO_ESPINHO
+                self.obstaculo.largura = LARGURA_ESPINHO
+                self.obstaculo.altura = ALTURA_ESPINHO
+                self.obstaculo.y = Y_ESPINHO
+                self.contador_espinhos = 0
             else:
-                self.obstaculo.largura = 30
-                self.obstaculo.altura = 70
-                self.obstaculo.y = CHAO
-        
-            self.obstaculo.tipo = aleatorio
+                self.contador_espinhos += 1
+
+                aleatorio = random.randint(0,2)
+                if aleatorio == 1:
+                    self.obstaculo.largura = 20
+                    self.obstaculo.altura = 40
+                    self.obstaculo.y = CHAO
+                elif aleatorio == 2:
+                    self.obstaculo.largura = 30
+                    self.obstaculo.altura = 25
+                    self.obstaculo.y = CHAO + 30
+                else:
+                    self.obstaculo.largura = 30
+                    self.obstaculo.altura = 70
+                    self.obstaculo.y = CHAO
+            
+                self.obstaculo.tipo = aleatorio
 
         self.dino.atualizar()
 
