@@ -236,10 +236,7 @@ Mudança de cenário: gerador de espinhos a cada 10 obstáculos (`tipo` 6, 810×
 - [x] Pássaro / obstáculos no ar + abaixar
 - [x] Ordem das ações, queda rápida, momento da colisão e aceleração do mundo
 - [x] Mutação com quantidade variável + decaimento do teto (armadilha do 174)
-- [x] Avião no código — terceira saída (`saidas[2]`) aciona `usar_aviao`
-- [x] Gerador de espinhos a cada 10 obstáculos (commit `2b57133`)
-- [x] Testes `test_espinho_aviao.py` (constantes, contador, 11º obstáculo)
-- [x] Experimentos 1–7 documentados no README (treino ponto 7: pico **2080** ger. 10, final **1827**, sem colapso em 174)
+- [x] Avião (`saidas[2]`) + espinhos a cada 10 obstáculos
 - [ ] Salvar/carregar o melhor DNA em arquivo
 - [ ] Interface gráfica (Pygame)
 
