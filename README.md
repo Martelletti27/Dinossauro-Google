@@ -10,13 +10,11 @@ Várias redes neurais competem em paralelo. As que sobrevivem mais tempo passam 
 
 ### Rede neural (MLP)
 
-
 | Camada  | Tamanho              | Função                                                                  |
 | ------- | -------------------- | ----------------------------------------------------------------------- |
 | Entrada | 6 sensores + 1 bias  | distância, largura, Y e altura do obstáculo, velocidade, altura do dino |
 | Oculta  | 6 neurônios + 1 bias | processamento intermediário                                             |
 | Saída   | 3 neurônios          | pular, abaixar, avião                                                   |
-
 
 - Ativação: **ReLU**
 - DNA: **70 pesos** por indivíduo
@@ -72,13 +70,11 @@ python -m dino_ai.treino
 
 Configuração atual em `dino_ai/treino.py`:
 
-
 | Parâmetro     | Valor |
 | ------------- | ----- |
 | `TAMANHO_POP` | 30    |
 | `GERACOES`    | 20    |
 | `MAX_PASSOS`  | 3000  |
-
 
 ### Setup atual do cenário (importante para ler os números)
 
@@ -210,6 +206,24 @@ Ajustes feitos **um de cada vez**. Medição: 8 treinos com sementes fixas (0 a 
 - **Divergências ainda abertas no genético (opcional):** população do original é 2000 (aqui 30); o C tem 3 tipos de operador de mutação (substituir / multiplicar / somar). Aqui só substituímos.
 - **Divergências aceitas de propósito:** um único obstáculo reciclado; dino em `x` fixo (100); caixa de colisão com medidas fixas.
 
+#### 7) Espinho + avião (saidas[2])
+
+Setup: pop 30 × 20 gerações, `MAX_PASSOS = 3000` (igual aos experimentos 3–6).  
+Mudança de cenário: gerador de espinhos a cada 10 obstáculos (`tipo` 6, 810×31, Y=10; commit `2b57133`), terceira saída da rede aciona o **avião** (`saidas[2]`), e testes novos em `dino_ai/tests/test_espinho_aviao.py` (constantes, contador a cada 10, 11º obstáculo = espinho).
+
+| Momento | Melhor fitness |
+|---------|----------------|
+| Geração 0 | 811 |
+| Pico no treino | **2080** (geração 10) |
+| Final (geração 19) | 1827 |
+
+**Leitura:**
+
+- Não houve colapso em **174**: o melhor de cada geração ficou bem acima disso (o elite não ficou parado no primeiro cacto). Ainda aparecem indivíduos com 174/90 na população, mas o campeão evolui.
+- O platô (~1800–2100) ficou **abaixo** do pós-174 do experimento 6 (~4000–5000): o espinho (faixa larga) e o cenário com avião apertam o episódio; sobreviver 3000 passos fica mais raro.
+- Pico **2080** na geração 10; o final (1827) oscila em torno dessa faixa — típico de mutação em torno do elite sem “encher o cronômetro” como nos cactos simples.
+- Tempo total de parede: **não registrado** no log do terminal (só saídas de fitness por indivíduo e `Geracao: … Melhor: …`).
+
 ## Progresso do port Python
 
 - [x] Rede neural (`neural_network.py`) — forward pass completo
@@ -222,7 +236,10 @@ Ajustes feitos **um de cada vez**. Medição: 8 treinos com sementes fixas (0 a 
 - [x] Pássaro / obstáculos no ar + abaixar
 - [x] Ordem das ações, queda rápida, momento da colisão e aceleração do mundo
 - [x] Mutação com quantidade variável + decaimento do teto (armadilha do 174)
-- [ ] Terceira saída da rede (avião) ou redução para 2 saídas
+- [x] Avião no código — terceira saída (`saidas[2]`) aciona `usar_aviao`
+- [x] Gerador de espinhos a cada 10 obstáculos (commit `2b57133`)
+- [x] Testes `test_espinho_aviao.py` (constantes, contador, 11º obstáculo)
+- [x] Experimentos 1–7 documentados no README (treino ponto 7: pico **2080** ger. 10, final **1827**, sem colapso em 174)
 - [ ] Salvar/carregar o melhor DNA em arquivo
 - [ ] Interface gráfica (Pygame)
 
